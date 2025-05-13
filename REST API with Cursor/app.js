@@ -1,23 +1,31 @@
 const express = require('express');
 const userRoutes = require('./routes/user');
-require('./config/database'); // Import database configuration
+const createDatabase = require('./config/database');
 
-const app = express();
+async function startServer() {
+    const app = express();
 
-// Middleware
-app.use(express.json()); // Parse JSON bodies
+    // Init DB
+    const db = await createDatabase();
 
-// Routes
-app.use('/user', userRoutes);
+    // Middleware
+    app.use(express.json());
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
-});
+    // Routes
+    app.use('/user', userRoutes);
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    // Error handling
+    app.use((err, req, res, next) => {
+        console.error(err.stack);
+        res.status(500).json({ error: 'Something went wrong!' });
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+startServer().catch(err => {
+    console.error('Failed to start server:', err);
 });

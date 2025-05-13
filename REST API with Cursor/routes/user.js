@@ -3,9 +3,9 @@ const router = express.Router();
 const { signup, login } = require('../models/user');
 
 // Signup route
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
-        const user = signup(req.body);
+        const user = await signup(req.body);
         res.status(201).json({
             message: 'User created successfully',
             user: {
@@ -20,10 +20,10 @@ router.post('/signup', (req, res) => {
 });
 
 // Login route
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = login(email, password);
+        const user = await login(email, password);
         res.status(200).json({
             message: 'Login successful',
             user: {

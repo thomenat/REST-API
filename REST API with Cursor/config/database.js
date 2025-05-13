@@ -1,16 +1,18 @@
-const { Database } = require('node:sqlite');
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
 const path = require('path');
 
 const dbPath = path.join(__dirname, 'database.sqlite');
 
-// Create a new database connection
-const db = new Database(dbPath);
+async function createDatabase() {
+  const db = await open({
+    filename: dbPath,
+    driver: sqlite3.Database
+  });
 
-// Enable foreign keys
-db.exec('PRAGMA foreign_keys = ON');
+  await db.exec('PRAGMA foreign_keys = ON');
 
-// Create users table if it doesn't exist
-db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE NOT NULL,
@@ -18,6 +20,9 @@ db.exec(`
         name TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-`);
+  `);
 
-module.exports = db; 
+  return db;
+}
+
+module.exports = createDatabase;
