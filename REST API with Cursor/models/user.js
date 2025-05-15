@@ -1,5 +1,5 @@
-const createDatabase = require('../config/database');
-const bcrypt = require('bcryptjs');
+import createDatabase from '../config/database.js';
+import bcrypt from 'bcryptjs';
 
 const signup = async (userData) => {
     try {
@@ -16,29 +16,6 @@ const signup = async (userData) => {
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(userData.password, 10); // 10 = salt rounds
-
-        // Verify user credentials
-        const verifyCredentials = async (email, password) => {
-            const db = await createDatabase();
-            
-            // Get user by email
-            const user = await db.get(
-                'SELECT * FROM users WHERE email = ?',
-                email
-            );
-
-            if (!user) {
-                return { isValid: false, error: 'Invalid credentials' };
-            }
-
-            // Compare hashed passwords
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) {
-                return { isValid: false, error: 'Invalid credentials' };
-            }
-
-            return { isValid: true, user: { id: user.id, email: user.email, name: user.name } };
-        };
 
         // Insert new user
         const result = await db.run(
@@ -89,7 +66,7 @@ const login = async (email, password) => {
     }
 };
 
-module.exports = {
+export {
     signup,
     login
 };

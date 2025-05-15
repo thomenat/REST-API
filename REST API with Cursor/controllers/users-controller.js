@@ -1,6 +1,7 @@
 import { signup, login } from '../models/user.js';
+import { generateToken } from '../util/auth.js';
 
-export function handleSignup(req, res) {
+export async function handleSignup(req, res) {
     try {
         const { email, password, name } = req.body;
         
@@ -31,21 +32,24 @@ export function handleSignup(req, res) {
             });
         }
 
-        const newUser = signup({ email, password, name });
+        const newUser = await signup({ email, password, name });
+        const token = generateToken(newUser);
+        
         res.status(201).json({
             message: 'User created successfully',
             user: {
                 id: newUser.id,
                 email: newUser.email,
                 name: newUser.name
-            }
+            },
+            token
         });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-export const handleLogin = (req, res) => {
+export const handleLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         
@@ -54,14 +58,17 @@ export const handleLogin = (req, res) => {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        const user = login(email, password);
+        const user = await login(email, password);
+        const token = generateToken(user);
+
         res.status(200).json({
             message: 'Login successful',
             user: {
                 id: user.id,
                 email: user.email,
                 name: user.name
-            }
+            },
+            token
         });
     } catch (error) {
         res.status(401).json({ error: error.message });

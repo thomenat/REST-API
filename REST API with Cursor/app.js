@@ -1,6 +1,7 @@
-const express = require('express');
-const userRoutes = require('./routes/user');
-const createDatabase = require('./config/database');
+import express from 'express';
+import userRoutes from './routes/user.js';
+import eventRoutes from './routes/events.js';
+import createDatabase from './config/database.js';
 
 async function startServer() {
     const app = express();
@@ -13,6 +14,7 @@ async function startServer() {
 
     // Routes
     app.use('/user', userRoutes);
+    app.use('/events', eventRoutes);
 
     // Error handling
     app.use((err, req, res, next) => {
