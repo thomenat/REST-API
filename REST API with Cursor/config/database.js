@@ -33,10 +33,22 @@ async function createDatabase() {
         description TEXT,
         date DATETIME NOT NULL,
         location TEXT,
+        image_path TEXT,
         user_id INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS registrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
 

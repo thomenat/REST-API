@@ -5,8 +5,11 @@ import {
     getAllEventsController, 
     getEventByIdController,
     updateEventController,
-    deleteEventController 
+    deleteEventController,
+    registerForEventController,
+    unregisterForEventController 
 } from '../controllers/events-controller.js';
+import { upload } from '../util/upload.js';
 
 const router = express.Router();
 
@@ -26,7 +29,7 @@ const authenticateUser = (req, res, next) => {
 };
 
 // Create a new event
-router.post('/', authenticateUser, createEventController);
+router.post('/', authenticateUser, upload.single('image'), createEventController);
 
 // Get all events
 router.get('/', getAllEventsController);
@@ -35,9 +38,14 @@ router.get('/', getAllEventsController);
 router.get('/:id', getEventByIdController);
 
 // Update an event
-router.put('/:id', authenticateUser, updateEventController);
+router.put('/:id', authenticateUser, upload.single('image'), updateEventController);
 
 // Delete an event
 router.delete('/:id', authenticateUser, deleteEventController);
+
+
+router.post('/:id/register', authenticateUser, registerForEventController);
+
+router.post('/:id/unregister', authenticateUser, unregisterForEventController);
 
 export default router;

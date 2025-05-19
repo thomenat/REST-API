@@ -19,11 +19,11 @@ async function createEvent(eventData, userId) {
         driver: sqlite3.Database
     });
 
-    const { title, description, date, location } = eventData;
+    const { title, description, date, location, image_path } = eventData;
     
     const result = await db.run(
-        'INSERT INTO events (title, description, date, location, user_id) VALUES (?, ?, ?, ?, ?)',
-        [title, description, date, location, userId]
+        'INSERT INTO events (title, description, date, location, user_id, image_path) VALUES (?, ?, ?, ?, ?, ?)',
+        [title, description, date, location, userId, image_path]
     );
 
     const event = await db.get('SELECT * FROM events WHERE id = ?', result.lastID);
@@ -84,11 +84,11 @@ async function updateEvent(eventId, eventData, userId) {
         throw new Error('Event not found or unauthorized');
     }
 
-    const { title, description, date, location } = eventData;
+    const { title, description, date, location, image_path } = eventData;
     
     await db.run(
-        'UPDATE events SET title = ?, description = ?, date = ?, location = ? WHERE id = ?',
-        [title || event.title, description || event.description, date || event.date, location || event.location, eventId]
+        'UPDATE events SET title = ?, description = ?, date = ?, location = ?, image_path = ? WHERE id = ?',
+        [title || event.title, description || event.description, date || event.date, location || event.location, image_path || event.image_path, eventId]
     );
 
     const updatedEvent = await db.get('SELECT * FROM events WHERE id = ?', eventId);
@@ -122,10 +122,81 @@ async function deleteEvent(eventId, userId) {
     return true;
 }
 
+/**
+ * Check if a user is registered for an event
+ * @param {number} eventId - ID of the event
+ * @param {number} userId - ID of the user
+ * @returns {boolean} True if user is registered, false otherwise
+ */
+async function checkUserRegistration(eventId, userId) {
+    const db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database
+    });
+
+    const registration = await db.get(
+        'SELECT * FROM registrations WHERE event_id = ? AND user_id = ?',
+        [eventId, userId]
+    );
+    
+    await db.close();
+    return !!registration;
+}
+
+/**
+ * Register a user for an event
+ * @param {number} eventId - ID of the event
+ * @param {number} userId - ID of the user
+ * @returns {Object} Registration details
+ */
+async function registerUserForEvent(eventId, userId) {
+    const db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database
+    });
+
+    const result = await db.run(
+        'INSERT INTO registrations (event_id, user_id) VALUES (?, ?)',
+        [eventId, userId]
+    );
+
+    const registration = await db.get(
+        'SELECT * FROM registrations WHERE id = ?',
+        result.lastID
+    );
+    
+    await db.close();
+    return registration;
+}
+
+/**
+ * Unregister a user from an event
+ * @param {number} eventId - ID of the event
+ * @param {number} userId - ID of the user
+ * @returns {boolean} True if unregistration was successful
+ */
+async function unregisterUserFromEvent(eventId, userId) {
+    const db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database
+    });
+
+    await db.run(
+        'DELETE FROM registrations WHERE event_id = ? AND user_id = ?',
+        [eventId, userId]
+    );
+    
+    await db.close();
+    return true;
+}
+
 export {
     createEvent,
     getAllEvents,
     getEventById,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    checkUserRegistration,
+    registerUserForEvent,
+    unregisterUserFromEvent
 };

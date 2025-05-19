@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import userRoutes from './routes/user.js';
 import eventRoutes from './routes/events.js';
 import createDatabase from './config/database.js';
@@ -10,7 +11,9 @@ async function startServer() {
     const db = await createDatabase();
 
     // Middleware
+    app.use(cors());
     app.use(express.json());
+    app.use(express.static('public'));
 
     // Routes
     app.use('/user', userRoutes);
