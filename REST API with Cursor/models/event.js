@@ -10,10 +10,10 @@ const dbPath = path.join(__dirname, '../config/database.sqlite');
 /**
  * Create a new event
  * @param {Object} eventData - Event details
- * @param {number} creatorId - ID of the user creating the event
+ * @param {number} userId - ID of the user creating the event
  * @returns {Object} Created event
  */
-async function createEvent(eventData, creatorId) {
+async function createEvent(eventData, userId) {
     const db = await open({
         filename: dbPath,
         driver: sqlite3.Database
@@ -22,8 +22,8 @@ async function createEvent(eventData, creatorId) {
     const { title, description, date, location } = eventData;
     
     const result = await db.run(
-        'INSERT INTO events (title, description, date, location, creator_id) VALUES (?, ?, ?, ?, ?)',
-        [title, description, date, location, creatorId]
+        'INSERT INTO events (title, description, date, location, user_id) VALUES (?, ?, ?, ?, ?)',
+        [title, description, date, location, userId]
     );
 
     const event = await db.get('SELECT * FROM events WHERE id = ?', result.lastID);
@@ -76,7 +76,7 @@ async function updateEvent(eventId, eventData, userId) {
     });
 
     const event = await db.get(
-        'SELECT * FROM events WHERE id = ? AND creator_id = ?',
+        'SELECT * FROM events WHERE id = ? AND user_id = ?',
         [eventId, userId]
     );
 
@@ -109,7 +109,7 @@ async function deleteEvent(eventId, userId) {
     });
 
     const event = await db.get(
-        'SELECT * FROM events WHERE id = ? AND creator_id = ?',
+        'SELECT * FROM events WHERE id = ? AND user_id = ?',
         [eventId, userId]
     );
 

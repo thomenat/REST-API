@@ -33,7 +33,7 @@ async function createDatabase() {
         description TEXT,
         date DATETIME NOT NULL,
         location TEXT,
-        creator_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE

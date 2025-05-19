@@ -86,13 +86,22 @@ export async function updateEventController(req, res) {
         const eventId = req.params.id;
         const eventData = req.body;
         const userId = req.userData.userId;
+
+        // Get the existing event first
+        const existingEvent = await getEventById(eventId);
+        
+        if (!existingEvent) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        // Check if the user is the owner of the event
+        if (existingEvent.user_id !== userId) {
+            return res.status(403).json({ error: 'Unauthorized - you can only edit your own events' });
+        }
         
         const updatedEvent = await updateEvent(eventId, eventData, userId);
         res.status(200).json(updatedEvent);
     } catch (error) {
-        if (error.message === 'Event not found or unauthorized') {
-            return res.status(404).json({ error: error.message });
-        }
         res.status(500).json({ error: error.message });
     }
 }
@@ -106,13 +115,22 @@ export async function deleteEventController(req, res) {
     try {
         const eventId = req.params.id;
         const userId = req.userData.userId;
+
+        // Get the existing event first
+        const existingEvent = await getEventById(eventId);
+        
+        if (!existingEvent) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        // Check if the user is the owner of the event
+        if (existingEvent.user_id !== userId) {
+            return res.status(403).json({ error: 'Unauthorized - you can only delete your own events' });
+        }
         
         await deleteEvent(eventId, userId);
         res.status(200).json({ message: 'Event deleted successfully' });
     } catch (error) {
-        if (error.message === 'Event not found or unauthorized') {
-            return res.status(404).json({ error: error.message });
-        }
         res.status(500).json({ error: error.message });
     }
 }
